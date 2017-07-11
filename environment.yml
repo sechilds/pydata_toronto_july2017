@@ -1,0 +1,28 @@
+name: pydata_toronto_july2017
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - selenium
+  - python=3.6
+  - pandas=0.20.2
+  - numpy
+  - matplotlib
+  - scipy
+  - seaborn
+  - ipython
+  - ipykernel
+  - nb_conda
+  - nb_conda_kernels
+  - jupyter_core
+  - sqlalchemy
+# - pytables
+  - openpyxl
+# - xlrd
+# - scipy
+  - pytest
+# - lxml
+# - beautifulsoup4
+  - pip:
+    - missingno
+    - pandas_summary
