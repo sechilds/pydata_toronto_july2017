@@ -434,8 +434,18 @@ df1['weight'] = df1['weight'].fillna(0)
 ```python
 # relies on data being in year, month, date columns
 survey_df['date'] = pd.to_datetime(survey_df[['year', 'month', 'day'])
+
 # doesn't work because April 31 and September 31
 survey_df['date'] = pd.to_datetime(survey_df[['year', 'month', 'day'], errors='coerce')
+# look at the rows with errors
+surveys_df[pd.to_datetime(surveys_df[['year', 'month', 'day']], errors='coerce').isnull()]
+
+# more investigation -- define a function that pairs up months and days
+def get_month_day_pair(x):
+    return x['month'].astype(str)+ "-" + x['day'].astype(str)
+
+# apply that to our data frame.
+surveys_df[pd.to_datetime(surveys_df[['year', 'month', 'day']], errors='coerce').isnull()].pipe(get_month_day_pair).value_counts().sort_values()
 ```
 
 ```python
