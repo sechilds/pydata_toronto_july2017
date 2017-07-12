@@ -433,7 +433,128 @@ df1['weight'] = df1['weight'].fillna(0)
 
 ```python
 # relies on data being in year, month, date columns
-survey_df['date'] = pd.to_datetime(survey_df)
+survey_df['date'] = pd.to_datetime(survey_df[['year', 'month', 'day'])
+# doesn't work because April 31 and September 31
+survey_df['date'] = pd.to_datetime(survey_df[['year', 'month', 'day'], errors='coerce')
+```
+
+```python
+survey_df['species_cat'] = pd.Categorical(surveys_df.species_id)
+```
+
+## Functions and Data Frames
+
+* Several functions that can let functions work with data frames.
+* Functions are great -- repoducable code
+
+### The `apply` method
+
+```python
+pd.df.apply(func, axis=0, broadcase=False, raw=False, reduce=None,
+	args=(), **kwargs)
+```
+
+Pass each row or column to the fuction as a series - returns whatever the
+	funciton is.
+
+```python
+surveys_df[['hindfoot_length', 'weight']].apply(lambda x: x.mean())
+```
+
+```python
+def standardize(x):
+	return (x - x.mean)/x.std()
+surveys_df[['hindfoot_length', 'weight']].apply(standardize)
+```
+
+### The `applymap` method
+
+```python
+pd.df.applymap(func)
+```
+
+Apply function to each element of the data frame. They come one at
+a time.
+
+```python
+# note the trick to split things into multiple lines
+(surveys_df[['hindfoot_length', 'weight']]
+	.apply(standardize).applymap(lambda x: '{:03.2f}'.format(x)))
+```
+
+### The `assign` method
+
+```python
+pd.df.assign(**kwargs)
+```
+
+Create new columns in the data frame -- using keword arguments.
+If you pass a value, you use that to create the column. If you
+pass a callable -- it gets applied to the whole data frame.
+
+```python
+surveys_df.assign(double_wt = surveys_df.weight * 2)
+```
+
+```python
+# need a new function that takes a whole DF
+def standardize_weight(df):
+	return standardize(df['weight'])
+
+surveys_df.assign(std_wt = standardize_weight)
+
+# or you could do the lambda version
+surveys_df.assign(std_wt = lambda x: standardize(x['weight']))
+
+### The `pipe` method
+
+```python
+pd.df.pipe(func, *args, **kwargs)
+```
+
+Applies function to the data frame -- with args & kwargs
+This allows for nice method changing.
+
+Start with a digression in the `any` function. It returns `True` if anything
+passed to it is `True`.
+
+So, to find out if any columns contain missing values:
+
+```python
+# axis = 0 is the default
+surveys_df.isnull().apply(any, axis=0)
+```
+
+```python
+# check if any row contains missing values
+surveys_df.isnull().apply(any, axis=1)
+```
+
+```python
+# create function to drop rows with missing data
+def drop_rows_with_missing_data(df):
+	return df[~df.isnull.apply(any, axis=1)]
+
+surveys_df.pipe(drop_any_with_missing_data)
+```
+
+### Method Chaining
+
+see [Method Chaining](https://tomaugspurger.github.io/method-chaining.html)
+
+```python
+# define a clean date function
+def clean_date(df):
+	return pd.to_datetime(df[['year', 'month', day']], errors='coerce')
+
+(surveys_df
+	.pipe(drop_any_with_missing_data)
+	.pipe(clean_date)
+	.assign(species_cat = lambda x: pd.Categorical(x['species_id'])
+	.assign(sex_cat = lambda x: pd.Categorical(x['sex'])
+	.assign(hindfoot_length_std = lambda x: standardize(x['hindfoot_length']))
+	.assign(weight_std = lambda x: standardize(x['weight']))
+	.assign(decade = df.year // 10 * 10))
 ```
 
 ## Combining DataFrames
