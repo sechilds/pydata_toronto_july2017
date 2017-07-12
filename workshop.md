@@ -165,9 +165,20 @@ sorted_data = surveys_df.groupby('sex')
 ```python
 # summary statistics for all numeric columns by sex
 sorted_data.describe()
+# unstack the summary stats
+sorted_data.stack()
+# transform into a series - moves sex index to top
+sorted_data.unstack()
+# transform back into a data frame - move sex again
+sorted_data.unstack()
+# unstack differently by moving stats
+sorted_data.unstack(1)
 # provide the mean for each numeric column by sex
 sorted_data.mean()
 ```
+
+* `unstack` - the default is the last level - can pass a level numbe OR level name
+* You can `unstack` a series, but you can't `stack` it -- that would make no sense.
 
 Challenge - multiple group.
 
@@ -252,6 +263,8 @@ a[5]
 
 a[len(a)]
 ```
+
+Slicing `a[1:3]` or `a[:4]` or `a[2:]`
 
 Slicing rows - give `[]` a slice or integer -- and it applies it to the rows!
 
